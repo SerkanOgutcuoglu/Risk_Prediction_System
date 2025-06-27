@@ -68,6 +68,7 @@ json
   "ruleBasedRisk": "85%"
 }
 ```
+```
 📂 Proje Yapısı / Project Structure
 text
 ├── /output/            # Eğitilmiş model ve ön işlemciler
@@ -76,6 +77,8 @@ text
 ├── model_builder.py     # LSTM modeli oluşturma
 ├── app.py              # Flask API
 └── Dockerfile          # Çok aşamalı container build
+
+```
 🌍 Kullanım Senaryoları / Use Cases
 TR: Şüpheli oturum açma girişimlerinin gerçek zamanlı tespiti
 
