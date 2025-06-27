@@ -41,7 +41,7 @@ Test R2 Score: 0.9932  # %99.32 varyans açıklaması
 MAE: 0.008             # Düşük tahmin hatası
 TR: Model, sentetik veride davranışsal kalıpları yakalamada mükemmel performans gösterdi.
 EN: The model excelled at capturing behavioral patterns in synthetic data.
-
+```
 🚀 Kurulum / Installation
 Docker ile Çalıştırma / Run with Docker
 bash
@@ -52,21 +52,22 @@ EN: App runs at http://localhost:5000.
 
 🖥️ API Endpoint
 POST /predict
-
+```
 json
 {
   "UserId": "U1001",
   "ClientIP": "192.168.1.100",
   "MFAMethod": "SMS"
 }
+```
 Yanıt / Response:
-'bash
+```
 json
 {
   "predictedRisk": "Yüksek (92%)",
   "ruleBasedRisk": "85%"
 }
-'
+```
 📂 Proje Yapısı / Project Structure
 text
 ├── /output/            # Eğitilmiş model ve ön işlemciler
