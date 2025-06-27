@@ -1,0 +1,7 @@
+# requirements.txt
+tensorflow==2.15.0  # TensorFlow'un uyumlu bir sürümünü belirtmek iyidir
+scikit-learn
+pandas
+numpy
+faker
+Flask

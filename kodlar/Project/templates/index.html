@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Tahmin Uygulaması</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 25px;
+        }
+
+        div.input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            /* Padding dahil toplam genişliği ayarlar */
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #d4edda;
+            background-color: #dff0d8;
+            border-radius: 5px;
+            color: #155724;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        #result p {
+            margin: 5px 0;
+        }
+
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Risk Skoru Tahmini</h1>
+        <div class="input-group">
+            <label for="userId">Kullanıcı ID:</label>
+            <input type="text" id="userId" value="U10001">
+        </div>
+        <div class="input-group">
+            <label for="clientIp">Client IP:</label>
+            <input type="text" id="clientIp" value="192.168.1.5">
+        </div>
+        <div class="input-group">
+            <label for="mfaMethod">MFA Metodu:</label>
+            <select id="mfaMethod">
+                {% for method in mfa_methods %}
+                <option value="{{ method }}">{{ method }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="application">Uygulama:</label>
+            <select id="application">
+                {% for app in applications %}
+                <option value="{{ app }}">{{ app }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="browser">Tarayıcı:</label>
+            <select id="browser">
+                {% for browser_name in browsers %}
+                <option value="{{ browser_name }}">{{ browser_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="os">İşletim Sistemi:</label>
+            <select id="os">
+                {% for os_name in oss %}
+                <option value="{{ os_name }}">{{ os_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="unit">Birim:</label>
+            <select id="unit">
+                {% for unit_name in units %}
+                <option value="{{ unit_name }}">{{ unit_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="title">Unvan:</label>
+            <select id="title">
+                {% for title_name in titles %}
+                <option value="{{ title_name }}">{{ title_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button onclick="predictRisk()">Risk Hesapla</button>
+        <div id="error"></div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function predictRisk() {
+            // Hata mesajını temizle
+            document.getElementById('error').innerHTML = '';
+            document.getElementById('result').innerHTML = '';
+
+            const userId = document.getElementById('userId').value;
+            const clientIp = document.getElementById('clientIp').value;
+            const mfaMethod = document.getElementById('mfaMethod').value;
+            const application = document.getElementById('application').value;
+            const browser = document.getElementById('browser').value;
+            const os = document.getElementById('os').value;
+            const unit = document.getElementById('unit').value;
+            const title = document.getElementById('title').value;
+
+            // Alanların boş olup olmadığını kontrol et
+            if (!userId || !clientIp || !mfaMethod || !application || !browser || !os || !unit || !title) {
+                document.getElementById('error').innerHTML = '<p>Lütfen tüm alanları doldurun!</p>';
+                return;
+            }
+
+            const data = {
+                UserId: userId,
+                ClientIP: clientIp,
+                MFAMethod: mfaMethod,
+                Application: application,
+                Browser: browser,
+                OS: os,
+                Unit: unit,
+                Title: title
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    // API'den gelen hata mesajını göster
+                    throw new Error(result.error || `HTTP error! Status: ${response.status}`);
+                }
+
+                document.getElementById('result').innerHTML = `
+                    <p><strong>Kullanıcı ID:</strong> ${result.userId}</p>
+                    <p><strong>Gerçek Risk Skoru:</strong> ${result.actualRiskScore.toFixed(2)}%</p>
+                    <p><strong>Tahmin Edilen Risk Skoru:</strong> ${result.predictedRiskScore.toFixed(2)}%</p>
+                    <p><strong>Değerlendirme:</strong> <span style="font-weight: bold; color: ${result.isRisky === 'Yüksek Riskli' ? 'red' : 'green'};">${result.isRisky}</span></p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('error').innerHTML = `<p style="color: red;">Hata oluştu: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
